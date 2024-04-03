@@ -86,7 +86,7 @@ func main() {
 	}
 
 	// Create a new row of data
-	results.NewRow()
+	
 	results.Append("Account ID", GetAccountID(serviceFactory.GetAccountIDService(), monitor))
 	results.Append("Timestamp", time.Now().Format(time.RFC3339))
 	results.Append("Region", displayRegion)
