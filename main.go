@@ -102,8 +102,8 @@ func main() {
 	// results.Append("# of EKS Nodes", EKSNodes(serviceFactory, monitor, settings.allRegions))
 	// results.Append("# of IAM Users", IAMUserCounts(serviceFactory, monitor))
 	// results.Append("# of OpenSearch Domains", OpenSearchDomainCounts(serviceFactory, monitor, settings.allRegions))
-    results.Append("# of Redshift Clusters", RedshiftClusterCounts(serviceFactory, monitor, settings.allRegions))
-
+	//results.Append("# of Redshift Clusters", RedshiftClusterCounts(serviceFactory, monitor, settings.allRegions))
+    results.Append("# of ElastiCache CacheClusters",  ElastiCacheClusterCounts(serviceFactory, monitor, settings.allRegions))
 
 	/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	 * Construct CSV Output

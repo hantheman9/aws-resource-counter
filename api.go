@@ -36,6 +36,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
+	"github.com/aws/aws-sdk-go/service/elasticache"
+    "github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -98,6 +100,27 @@ func (ec2i *EC2InstanceService) GetRegions(input *ec2.DescribeRegionsInput) (*ec
 func (ec2i *EC2InstanceService) InspectVolumes(input *ec2.DescribeVolumesInput,
 	fn func(*ec2.DescribeVolumesOutput, bool) bool) error {
 	return ec2i.Client.DescribeVolumesPages(input, fn)
+}
+
+// ElastiCacheService is a struct that knows how to interact with AWS ElastiCache CacheClusters.
+type ElastiCacheService struct {
+    Client elasticacheiface.ElastiCacheAPI
+}
+
+// GetElastiCacheService returns an instance of an ElastiCacheService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetElastiCacheService(regionName string) *ElastiCacheService {
+    var client elasticacheiface.ElastiCacheAPI
+    if regionName == "" {
+        client = elasticache.New(awssf.Session)
+    } else {
+        client = elasticache.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+    }
+
+    return &ElastiCacheService{
+        Client: client,
+    }
 }
 
 // IAMService is a struct that knows how to get the
@@ -282,6 +305,7 @@ type ServiceFactory interface {
 	GetIAMService() *IAMService
 	GetOpenSearchService(string) *OpenSearchService
 	GetRedshiftService(string) *RedshiftService
+	GetElastiCacheService(string) *ElastiCacheService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
