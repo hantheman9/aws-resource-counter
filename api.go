@@ -40,6 +40,8 @@ import (
     "github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
 	"github.com/aws/aws-sdk-go/service/docdb"
     "github.com/aws/aws-sdk-go/service/docdb/docdbiface"
+	"github.com/aws/aws-sdk-go/service/cloudfront"
+    "github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -142,6 +144,17 @@ func (awssf *AWSServiceFactory) GetDocDBService(regionName string) *DocDBService
     }
 
     return &DocDBService{
+        Client: client,
+    }
+}
+
+type CloudFrontService struct {
+    Client cloudfrontiface.CloudFrontAPI
+}
+
+func (awssf *AWSServiceFactory) GetCloudFrontService() *CloudFrontService {
+    client := cloudfront.New(awssf.Session)
+    return &CloudFrontService{
         Client: client,
     }
 }
@@ -330,6 +343,7 @@ type ServiceFactory interface {
 	GetRedshiftService(string) *RedshiftService
 	GetElastiCacheService(string) *ElastiCacheService
 	GetDocDBService(string) *DocDBService
+	GetCloudFrontService() *CloudFrontService
 }
 
 // AWSServiceFactory is a struct that holds a reference to

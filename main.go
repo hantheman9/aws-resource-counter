@@ -104,7 +104,8 @@ func main() {
 	// results.Append("# of OpenSearch Domains", OpenSearchDomainCounts(serviceFactory, monitor, settings.allRegions))
 	//results.Append("# of Redshift Clusters", RedshiftClusterCounts(serviceFactory, monitor, settings.allRegions))
     // results.Append("# of ElastiCache CacheClusters",  ElastiCacheClusterCounts(serviceFactory, monitor, settings.allRegions))
-    results.Append("# of DocumentDB Instances",  DocDBInstanceCounts(serviceFactory, monitor, settings.allRegions))
+    // results.Append("# of DocumentDB Instances",  DocDBInstanceCounts(serviceFactory, monitor, settings.allRegions))
+    results.Append("# of CloudFront Functions", CloudFrontFunctionCounts(serviceFactory, monitor))
 	/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	 * Construct CSV Output
 	 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
