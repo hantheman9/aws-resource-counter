@@ -42,6 +42,8 @@ import (
     "github.com/aws/aws-sdk-go/service/docdb/docdbiface"
 	"github.com/aws/aws-sdk-go/service/cloudfront"
     "github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
+	"github.com/aws/aws-sdk-go/service/apigateway"
+    "github.com/aws/aws-sdk-go/service/apigateway/apigatewayiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -158,6 +160,27 @@ func (awssf *AWSServiceFactory) GetCloudFrontService() *CloudFrontService {
         Client: client,
     }
 }
+
+// APIGatewayService struct definition
+type APIGatewayService struct {
+    Client apigatewayiface.APIGatewayAPI
+}
+
+// GetAPIGatewayService method to get an instance of APIGatewayService
+func (awssf *AWSServiceFactory) GetAPIGatewayService(regionName string) *APIGatewayService {
+    var client apigatewayiface.APIGatewayAPI
+    if regionName == "" {
+        client = apigateway.New(awssf.Session)
+    } else {
+        client = apigateway.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+    }
+
+    return &APIGatewayService{
+        Client: client,
+    }
+}
+
+
 
 // IAMService is a struct that knows how to get the
 // list of IAM users using an object that implements the IAM API interface.
@@ -344,6 +367,7 @@ type ServiceFactory interface {
 	GetElastiCacheService(string) *ElastiCacheService
 	GetDocDBService(string) *DocDBService
 	GetCloudFrontService() *CloudFrontService
+	GetAPIGatewayService(string) *APIGatewayService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
