@@ -32,6 +32,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 	"github.com/aws/aws-sdk-go/service/iam"
     "github.com/aws/aws-sdk-go/service/iam/iamiface"
+	"github.com/aws/aws-sdk-go/service/opensearchservice"
+    "github.com/aws/aws-sdk-go/service/opensearchservice/opensearchserviceiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -111,6 +113,27 @@ func (s *IAMService) ListUsers(input *iam.ListUsersInput) (*iam.ListUsersOutput,
 func (awssf *AWSServiceFactory) GetIAMService() *IAMService {
     return &IAMService{
         Client: iam.New(awssf.Session),
+    }
+}
+
+// OpenSearchService is a struct that knows how to interact with AWS OpenSearch domains.
+type OpenSearchService struct {
+    Client opensearchserviceiface.OpenSearchServiceAPI
+}
+
+// GetOpenSearchService returns an instance of an OpenSearchService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetOpenSearchService(regionName string) *OpenSearchService {
+    var client opensearchserviceiface.OpenSearchServiceAPI
+    if regionName == "" {
+        client = opensearchservice.New(awssf.Session)
+    } else {
+        client = opensearchservice.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+    }
+
+    return &OpenSearchService{
+        Client: client,
     }
 }
 
@@ -234,6 +257,7 @@ type ServiceFactory interface {
 	GetContainerService(string) *ContainerService
 	GetLightsailService(string) *LightsailService
 	GetIAMService() *IAMService
+	GetOpenSearchService(string) *OpenSearchService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
