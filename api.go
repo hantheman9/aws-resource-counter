@@ -38,6 +38,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 	"github.com/aws/aws-sdk-go/service/elasticache"
     "github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
+	"github.com/aws/aws-sdk-go/service/docdb"
+    "github.com/aws/aws-sdk-go/service/docdb/docdbiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -119,6 +121,27 @@ func (awssf *AWSServiceFactory) GetElastiCacheService(regionName string) *Elasti
     }
 
     return &ElastiCacheService{
+        Client: client,
+    }
+}
+
+// DocDBService is a struct that knows how to interact with AWS DocumentDB instances.
+type DocDBService struct {
+    Client docdbiface.DocDBAPI
+}
+
+// GetDocDBService returns an instance of a DocDBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetDocDBService(regionName string) *DocDBService {
+    var client docdbiface.DocDBAPI
+    if regionName == "" {
+        client = docdb.New(awssf.Session)
+    } else {
+        client = docdb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+    }
+
+    return &DocDBService{
         Client: client,
     }
 }
@@ -306,6 +329,7 @@ type ServiceFactory interface {
 	GetOpenSearchService(string) *OpenSearchService
 	GetRedshiftService(string) *RedshiftService
 	GetElastiCacheService(string) *ElastiCacheService
+	GetDocDBService(string) *DocDBService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
