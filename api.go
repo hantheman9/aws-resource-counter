@@ -20,20 +20,22 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs/ecsiface"
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/aws/aws-sdk-go/service/eks/eksiface"
+	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	"github.com/aws/aws-sdk-go/service/lightsail"
 	"github.com/aws/aws-sdk-go/service/lightsail/lightsailiface"
+	"github.com/aws/aws-sdk-go/service/opensearchservice"
+	"github.com/aws/aws-sdk-go/service/opensearchservice/opensearchserviceiface"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/rds/rdsiface"
+	"github.com/aws/aws-sdk-go/service/redshift"
+	"github.com/aws/aws-sdk-go/service/redshift/redshiftiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
-	"github.com/aws/aws-sdk-go/service/iam"
-    "github.com/aws/aws-sdk-go/service/iam/iamiface"
-	"github.com/aws/aws-sdk-go/service/opensearchservice"
-    "github.com/aws/aws-sdk-go/service/opensearchservice/opensearchserviceiface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -101,40 +103,61 @@ func (ec2i *EC2InstanceService) InspectVolumes(input *ec2.DescribeVolumesInput,
 // IAMService is a struct that knows how to get the
 // list of IAM users using an object that implements the IAM API interface.
 type IAMService struct {
-    Client iamiface.IAMAPI
+	Client iamiface.IAMAPI
 }
 
 // ListUsers wraps the ListUsers method of the IAM API.
 func (s *IAMService) ListUsers(input *iam.ListUsersInput) (*iam.ListUsersOutput, error) {
-    return s.Client.ListUsers(input)
+	return s.Client.ListUsers(input)
 }
 
 // Add to AWSServiceFactory to include a method for getting an IAMService instance
 func (awssf *AWSServiceFactory) GetIAMService() *IAMService {
-    return &IAMService{
-        Client: iam.New(awssf.Session),
-    }
+	return &IAMService{
+		Client: iam.New(awssf.Session),
+	}
+}
+
+// RedshiftService is a struct that knows how to interact with AWS Redshift clusters.
+type RedshiftService struct {
+	Client redshiftiface.RedshiftAPI
+}
+
+// GetRedshiftService returns an instance of a RedshiftService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetRedshiftService(regionName string) *RedshiftService {
+	var client redshiftiface.RedshiftAPI
+	if regionName == "" {
+		client = redshift.New(awssf.Session)
+	} else {
+		client = redshift.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &RedshiftService{
+		Client: client,
+	}
 }
 
 // OpenSearchService is a struct that knows how to interact with AWS OpenSearch domains.
 type OpenSearchService struct {
-    Client opensearchserviceiface.OpenSearchServiceAPI
+	Client opensearchserviceiface.OpenSearchServiceAPI
 }
 
 // GetOpenSearchService returns an instance of an OpenSearchService associated
 // with our session. The caller can supply an optional region name to construct
 // an instance associated with that region.
 func (awssf *AWSServiceFactory) GetOpenSearchService(regionName string) *OpenSearchService {
-    var client opensearchserviceiface.OpenSearchServiceAPI
-    if regionName == "" {
-        client = opensearchservice.New(awssf.Session)
-    } else {
-        client = opensearchservice.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
-    }
+	var client opensearchserviceiface.OpenSearchServiceAPI
+	if regionName == "" {
+		client = opensearchservice.New(awssf.Session)
+	} else {
+		client = opensearchservice.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
 
-    return &OpenSearchService{
-        Client: client,
-    }
+	return &OpenSearchService{
+		Client: client,
+	}
 }
 
 // RDSInstanceService is a struct that knows how to get the
@@ -258,6 +281,7 @@ type ServiceFactory interface {
 	GetLightsailService(string) *LightsailService
 	GetIAMService() *IAMService
 	GetOpenSearchService(string) *OpenSearchService
+	GetRedshiftService(string) *RedshiftService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
