@@ -32,6 +32,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/elb/elbiface"
+	"github.com/aws/aws-sdk-go/service/elbv2"
+	"github.com/aws/aws-sdk-go/service/elbv2/elbv2iface"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -214,6 +216,27 @@ func (awssf *AWSServiceFactory) GetELBService(regionName string) *ELBService {
 	}
 
 	return &ELBService{
+		Client: client,
+	}
+}
+
+// ELBv2Service is a struct that knows how to interact with AWS Elastic Load Balancers V2.
+type ELBv2Service struct {
+	Client elbv2iface.ELBV2API
+}
+
+// GetELBv2Service returns an instance of an ELBv2Service associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetELBv2Service(regionName string) *ELBv2Service {
+	var client elbv2iface.ELBV2API
+	if regionName == "" {
+		client = elbv2.New(awssf.Session)
+	} else {
+		client = elbv2.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &ELBv2Service{
 		Client: client,
 	}
 }
@@ -406,6 +429,7 @@ type ServiceFactory interface {
 	GetAPIGatewayService(string) *APIGatewayService
 	GetAPIGatewayV2Service(string) *APIGatewayV2Service
 	GetELBService(string) *ELBService
+	GetELBv2Service(string) *ELBv2Service
 }
 
 // AWSServiceFactory is a struct that holds a reference to
