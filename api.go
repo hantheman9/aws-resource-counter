@@ -52,6 +52,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/redshift/redshiftiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go/service/sagemaker"
+	"github.com/aws/aws-sdk-go/service/sagemaker/sagemakeriface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
@@ -286,6 +288,27 @@ func (awssf *AWSServiceFactory) GetNetworkFirewallService(regionName string) *Ne
 	}
 }
 
+// SageMakerService is a struct that knows how to interact with AWS SageMaker.
+type SageMakerService struct {
+	Client sagemakeriface.SageMakerAPI
+}
+
+// GetSageMakerService returns an instance of a SageMakerService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetSageMakerService(regionName string) *SageMakerService {
+	var client sagemakeriface.SageMakerAPI
+	if regionName == "" {
+		client = sagemaker.New(awssf.Session)
+	} else {
+		client = sagemaker.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &SageMakerService{
+		Client: client,
+	}
+}
+
 // IAMService is a struct that knows how to get the
 // list of IAM users using an object that implements the IAM API interface.
 type IAMService struct {
@@ -477,6 +500,7 @@ type ServiceFactory interface {
 	GetELBv2Service(string) *ELBv2Service
 	GetDynamoDBService(string) *DynamoDBService
 	GetNetworkFirewallService(string) *NetworkFirewallService
+	GetSageMakerService(string) *SageMakerService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
