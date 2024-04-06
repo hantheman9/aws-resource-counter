@@ -42,6 +42,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	"github.com/aws/aws-sdk-go/service/lightsail"
 	"github.com/aws/aws-sdk-go/service/lightsail/lightsailiface"
+	"github.com/aws/aws-sdk-go/service/networkfirewall"
+	"github.com/aws/aws-sdk-go/service/networkfirewall/networkfirewalliface"
 	"github.com/aws/aws-sdk-go/service/opensearchservice"
 	"github.com/aws/aws-sdk-go/service/opensearchservice/opensearchserviceiface"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -263,6 +265,27 @@ func (awssf *AWSServiceFactory) GetDynamoDBService(regionName string) *DynamoDBS
 	}
 }
 
+// NetworkFirewallService is a struct that knows how to interact with AWS Network Firewall.
+type NetworkFirewallService struct {
+	Client networkfirewalliface.NetworkFirewallAPI
+}
+
+// GetNetworkFirewallService returns an instance of a NetworkFirewallService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetNetworkFirewallService(regionName string) *NetworkFirewallService {
+	var client networkfirewalliface.NetworkFirewallAPI
+	if regionName == "" {
+		client = networkfirewall.New(awssf.Session)
+	} else {
+		client = networkfirewall.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &NetworkFirewallService{
+		Client: client,
+	}
+}
+
 // IAMService is a struct that knows how to get the
 // list of IAM users using an object that implements the IAM API interface.
 type IAMService struct {
@@ -453,6 +476,7 @@ type ServiceFactory interface {
 	GetELBService(string) *ELBService
 	GetELBv2Service(string) *ELBv2Service
 	GetDynamoDBService(string) *DynamoDBService
+	GetNetworkFirewallService(string) *NetworkFirewallService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
