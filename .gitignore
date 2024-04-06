@@ -3,3 +3,4 @@ coverage.out
 aws-resource-counter
 .vscode/
 dist/
+.idea/
