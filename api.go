@@ -22,6 +22,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
 	"github.com/aws/aws-sdk-go/service/docdb"
 	"github.com/aws/aws-sdk-go/service/docdb/docdbiface"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -241,6 +243,26 @@ func (awssf *AWSServiceFactory) GetELBv2Service(regionName string) *ELBv2Service
 	}
 }
 
+type DynamoDBService struct {
+	Client dynamodbiface.DynamoDBAPI
+}
+
+// GetDynamoDBService returns an instance of a DynamoDBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetDynamoDBService(regionName string) *DynamoDBService {
+	var client dynamodbiface.DynamoDBAPI
+	if regionName == "" {
+		client = dynamodb.New(awssf.Session)
+	} else {
+		client = dynamodb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &DynamoDBService{
+		Client: client,
+	}
+}
+
 // IAMService is a struct that knows how to get the
 // list of IAM users using an object that implements the IAM API interface.
 type IAMService struct {
@@ -430,6 +452,7 @@ type ServiceFactory interface {
 	GetAPIGatewayV2Service(string) *APIGatewayV2Service
 	GetELBService(string) *ELBService
 	GetELBv2Service(string) *ELBv2Service
+	GetDynamoDBService(string) *DynamoDBService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
