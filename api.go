@@ -14,12 +14,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/aws/aws-sdk-go/service/apigateway/apigatewayiface"
+	"github.com/aws/aws-sdk-go/service/apigatewayv2"
+	"github.com/aws/aws-sdk-go/service/apigatewayv2/apigatewayv2iface"
+	"github.com/aws/aws-sdk-go/service/cloudfront"
+	"github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
+	"github.com/aws/aws-sdk-go/service/docdb"
+	"github.com/aws/aws-sdk-go/service/docdb/docdbiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/ecs/ecsiface"
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/aws/aws-sdk-go/service/eks/eksiface"
+	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
+	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -36,16 +48,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
-	"github.com/aws/aws-sdk-go/service/elasticache"
-    "github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
-	"github.com/aws/aws-sdk-go/service/docdb"
-    "github.com/aws/aws-sdk-go/service/docdb/docdbiface"
-	"github.com/aws/aws-sdk-go/service/cloudfront"
-    "github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
-	"github.com/aws/aws-sdk-go/service/apigateway"
-    "github.com/aws/aws-sdk-go/service/apigateway/apigatewayiface"
-	"github.com/aws/aws-sdk-go/service/apigatewayv2"
-    "github.com/aws/aws-sdk-go/service/apigatewayv2/apigatewayv2iface"
 )
 
 // DefaultRegion is used if the caller does not supply a region
@@ -112,88 +114,108 @@ func (ec2i *EC2InstanceService) InspectVolumes(input *ec2.DescribeVolumesInput,
 
 // ElastiCacheService is a struct that knows how to interact with AWS ElastiCache CacheClusters.
 type ElastiCacheService struct {
-    Client elasticacheiface.ElastiCacheAPI
+	Client elasticacheiface.ElastiCacheAPI
 }
 
 // GetElastiCacheService returns an instance of an ElastiCacheService associated
 // with our session. The caller can supply an optional region name to construct
 // an instance associated with that region.
 func (awssf *AWSServiceFactory) GetElastiCacheService(regionName string) *ElastiCacheService {
-    var client elasticacheiface.ElastiCacheAPI
-    if regionName == "" {
-        client = elasticache.New(awssf.Session)
-    } else {
-        client = elasticache.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
-    }
+	var client elasticacheiface.ElastiCacheAPI
+	if regionName == "" {
+		client = elasticache.New(awssf.Session)
+	} else {
+		client = elasticache.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
 
-    return &ElastiCacheService{
-        Client: client,
-    }
+	return &ElastiCacheService{
+		Client: client,
+	}
 }
 
 // DocDBService is a struct that knows how to interact with AWS DocumentDB instances.
 type DocDBService struct {
-    Client docdbiface.DocDBAPI
+	Client docdbiface.DocDBAPI
 }
 
 // GetDocDBService returns an instance of a DocDBService associated
 // with our session. The caller can supply an optional region name to construct
 // an instance associated with that region.
 func (awssf *AWSServiceFactory) GetDocDBService(regionName string) *DocDBService {
-    var client docdbiface.DocDBAPI
-    if regionName == "" {
-        client = docdb.New(awssf.Session)
-    } else {
-        client = docdb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
-    }
+	var client docdbiface.DocDBAPI
+	if regionName == "" {
+		client = docdb.New(awssf.Session)
+	} else {
+		client = docdb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
 
-    return &DocDBService{
-        Client: client,
-    }
+	return &DocDBService{
+		Client: client,
+	}
 }
 
 type CloudFrontService struct {
-    Client cloudfrontiface.CloudFrontAPI
+	Client cloudfrontiface.CloudFrontAPI
 }
 
 func (awssf *AWSServiceFactory) GetCloudFrontService() *CloudFrontService {
-    client := cloudfront.New(awssf.Session)
-    return &CloudFrontService{
-        Client: client,
-    }
+	client := cloudfront.New(awssf.Session)
+	return &CloudFrontService{
+		Client: client,
+	}
 }
 
 // APIGatewayService struct definition
 type APIGatewayService struct {
-    Client apigatewayiface.APIGatewayAPI
+	Client apigatewayiface.APIGatewayAPI
 }
 
 // GetAPIGatewayService method to get an instance of APIGatewayService
 func (awssf *AWSServiceFactory) GetAPIGatewayService(regionName string) *APIGatewayService {
-    var client apigatewayiface.APIGatewayAPI
-    if regionName == "" {
-        client = apigateway.New(awssf.Session)
-    } else {
-        client = apigateway.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
-    }
+	var client apigatewayiface.APIGatewayAPI
+	if regionName == "" {
+		client = apigateway.New(awssf.Session)
+	} else {
+		client = apigateway.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
 
-    return &APIGatewayService{
-        Client: client,
-    }
+	return &APIGatewayService{
+		Client: client,
+	}
 }
 
 type APIGatewayV2Service struct {
-    Client apigatewayv2iface.ApiGatewayV2API
+	Client apigatewayv2iface.ApiGatewayV2API
 }
 
 func (awssf *AWSServiceFactory) GetAPIGatewayV2Service(regionName string) *APIGatewayV2Service {
-    var client apigatewayv2iface.ApiGatewayV2API
-    if regionName == "" {
-        client = apigatewayv2.New(awssf.Session)
-    } else {
-        client = apigatewayv2.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
-    }
-    return &APIGatewayV2Service{Client: client}
+	var client apigatewayv2iface.ApiGatewayV2API
+	if regionName == "" {
+		client = apigatewayv2.New(awssf.Session)
+	} else {
+		client = apigatewayv2.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+	return &APIGatewayV2Service{Client: client}
+}
+
+type ELBService struct {
+	Client elbiface.ELBAPI
+}
+
+// GetELBService returns an instance of an ELBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetELBService(regionName string) *ELBService {
+	var client elbiface.ELBAPI
+	if regionName == "" {
+		client = elb.New(awssf.Session)
+	} else {
+		client = elb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &ELBService{
+		Client: client,
+	}
 }
 
 // IAMService is a struct that knows how to get the
@@ -383,6 +405,7 @@ type ServiceFactory interface {
 	GetCloudFrontService() *CloudFrontService
 	GetAPIGatewayService(string) *APIGatewayService
 	GetAPIGatewayV2Service(string) *APIGatewayV2Service
+	GetELBService(string) *ELBService
 }
 
 // AWSServiceFactory is a struct that holds a reference to

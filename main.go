@@ -107,7 +107,8 @@ func main() {
 	//results.Append("# of DocumentDB Instances", DocDBInstanceCounts(serviceFactory, monitor, settings.allRegions))
 	//results.Append("# of CloudFront Functions", CloudFrontFunctionCounts(serviceFactory, monitor))
 	//results.Append("# of API Gateway RestAPIs", RestAPICounts(serviceFactory, monitor, settings.allRegions))
-	results.Append("# of API Gateway V2 APIs", countAPIGatewayV2Apis(serviceFactory, monitor, settings.allRegions))
+	// results.Append("# of API Gateway V2 APIs", countAPIGatewayV2Apis(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of Elastic Load Balancers", CountELBs(serviceFactory, monitor, settings.allRegions))
 	/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	 * Construct CSV Output
 	 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
