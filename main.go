@@ -100,7 +100,19 @@ func main() {
 	results.Append("# of Lightsail Instances", LightsailInstances(serviceFactory, monitor, settings.allRegions))
 	results.Append("# of S3 Buckets", S3Buckets(serviceFactory, monitor, settings.allRegions))
 	results.Append("# of EKS Nodes", EKSNodes(serviceFactory, monitor, settings.allRegions))
-
+	results.Append("# of IAM Users", IAMUserCounts(serviceFactory, monitor))
+	results.Append("# of OpenSearch Domains", OpenSearchDomainCounts(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of Redshift Clusters", RedshiftClusterCounts(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of ElastiCache CacheClusters", ElastiCacheClusterCounts(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of DocumentDB Instances", DocDBInstanceCounts(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of CloudFront Functions", CloudFrontFunctionCounts(serviceFactory, monitor))
+	results.Append("# of API Gateway RestAPIs", RestAPICounts(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of API Gateway V2 APIs", countAPIGatewayV2Apis(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of Elastic Load Balancers", CountELBs(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of Elastic Load Balancers v2", CountELBv2s(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of DynamoDB Tables", CountDynamoDBTables(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of Network Firewalls", CountNetworkFirewalls(serviceFactory, monitor, settings.allRegions))
+	results.Append("# of SageMaker Notebook Instances", CountSageMakerNotebookInstances(serviceFactory, monitor, settings.allRegions))
 	/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	 * Construct CSV Output
 	 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
@@ -110,7 +122,7 @@ func main() {
 
 	// Do we need to "explain" our S3 count?
 	if !settings.allRegions {
-		monitor.Message("\n*S3 counts cannot be computed on a per-region basis. This count is for ALL REGIONS.\n")
+		monitor.Message("\n*S3 counts, IAM Users, and CloudFront Functions cannot be computed on a per-region basis. This count is for ALL REGIONS.\n")
 	}
 
 	// Indicate success

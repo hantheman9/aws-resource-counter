@@ -14,20 +14,46 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/aws/aws-sdk-go/service/apigateway/apigatewayiface"
+	"github.com/aws/aws-sdk-go/service/apigatewayv2"
+	"github.com/aws/aws-sdk-go/service/apigatewayv2/apigatewayv2iface"
+	"github.com/aws/aws-sdk-go/service/cloudfront"
+	"github.com/aws/aws-sdk-go/service/cloudfront/cloudfrontiface"
+	"github.com/aws/aws-sdk-go/service/docdb"
+	"github.com/aws/aws-sdk-go/service/docdb/docdbiface"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/ecs/ecsiface"
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/aws/aws-sdk-go/service/eks/eksiface"
+	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/aws/aws-sdk-go/service/elasticache/elasticacheiface"
+	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
+	"github.com/aws/aws-sdk-go/service/elbv2"
+	"github.com/aws/aws-sdk-go/service/elbv2/elbv2iface"
+	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	"github.com/aws/aws-sdk-go/service/lightsail"
 	"github.com/aws/aws-sdk-go/service/lightsail/lightsailiface"
+	"github.com/aws/aws-sdk-go/service/networkfirewall"
+	"github.com/aws/aws-sdk-go/service/networkfirewall/networkfirewalliface"
+	"github.com/aws/aws-sdk-go/service/opensearchservice"
+	"github.com/aws/aws-sdk-go/service/opensearchservice/opensearchserviceiface"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/rds/rdsiface"
+	"github.com/aws/aws-sdk-go/service/redshift"
+	"github.com/aws/aws-sdk-go/service/redshift/redshiftiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go/service/sagemaker"
+	"github.com/aws/aws-sdk-go/service/sagemaker/sagemakeriface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
@@ -92,6 +118,255 @@ func (ec2i *EC2InstanceService) GetRegions(input *ec2.DescribeRegionsInput) (*ec
 func (ec2i *EC2InstanceService) InspectVolumes(input *ec2.DescribeVolumesInput,
 	fn func(*ec2.DescribeVolumesOutput, bool) bool) error {
 	return ec2i.Client.DescribeVolumesPages(input, fn)
+}
+
+// ElastiCacheService is a struct that knows how to interact with AWS ElastiCache CacheClusters.
+type ElastiCacheService struct {
+	Client elasticacheiface.ElastiCacheAPI
+}
+
+// GetElastiCacheService returns an instance of an ElastiCacheService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetElastiCacheService(regionName string) *ElastiCacheService {
+	var client elasticacheiface.ElastiCacheAPI
+	if regionName == "" {
+		client = elasticache.New(awssf.Session)
+	} else {
+		client = elasticache.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &ElastiCacheService{
+		Client: client,
+	}
+}
+
+// DocDBService is a struct that knows how to interact with AWS DocumentDB instances.
+type DocDBService struct {
+	Client docdbiface.DocDBAPI
+}
+
+// GetDocDBService returns an instance of a DocDBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetDocDBService(regionName string) *DocDBService {
+	var client docdbiface.DocDBAPI
+	if regionName == "" {
+		client = docdb.New(awssf.Session)
+	} else {
+		client = docdb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &DocDBService{
+		Client: client,
+	}
+}
+
+type CloudFrontService struct {
+	Client cloudfrontiface.CloudFrontAPI
+}
+
+func (awssf *AWSServiceFactory) GetCloudFrontService() *CloudFrontService {
+	client := cloudfront.New(awssf.Session)
+	return &CloudFrontService{
+		Client: client,
+	}
+}
+
+// APIGatewayService struct definition
+type APIGatewayService struct {
+	Client apigatewayiface.APIGatewayAPI
+}
+
+// GetAPIGatewayService method to get an instance of APIGatewayService
+func (awssf *AWSServiceFactory) GetAPIGatewayService(regionName string) *APIGatewayService {
+	var client apigatewayiface.APIGatewayAPI
+	if regionName == "" {
+		client = apigateway.New(awssf.Session)
+	} else {
+		client = apigateway.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &APIGatewayService{
+		Client: client,
+	}
+}
+
+type APIGatewayV2Service struct {
+	Client apigatewayv2iface.ApiGatewayV2API
+}
+
+func (awssf *AWSServiceFactory) GetAPIGatewayV2Service(regionName string) *APIGatewayV2Service {
+	var client apigatewayv2iface.ApiGatewayV2API
+	if regionName == "" {
+		client = apigatewayv2.New(awssf.Session)
+	} else {
+		client = apigatewayv2.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+	return &APIGatewayV2Service{Client: client}
+}
+
+type ELBService struct {
+	Client elbiface.ELBAPI
+}
+
+// GetELBService returns an instance of an ELBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetELBService(regionName string) *ELBService {
+	var client elbiface.ELBAPI
+	if regionName == "" {
+		client = elb.New(awssf.Session)
+	} else {
+		client = elb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &ELBService{
+		Client: client,
+	}
+}
+
+// ELBv2Service is a struct that knows how to interact with AWS Elastic Load Balancers V2.
+type ELBv2Service struct {
+	Client elbv2iface.ELBV2API
+}
+
+// GetELBv2Service returns an instance of an ELBv2Service associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetELBv2Service(regionName string) *ELBv2Service {
+	var client elbv2iface.ELBV2API
+	if regionName == "" {
+		client = elbv2.New(awssf.Session)
+	} else {
+		client = elbv2.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &ELBv2Service{
+		Client: client,
+	}
+}
+
+type DynamoDBService struct {
+	Client dynamodbiface.DynamoDBAPI
+}
+
+// GetDynamoDBService returns an instance of a DynamoDBService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetDynamoDBService(regionName string) *DynamoDBService {
+	var client dynamodbiface.DynamoDBAPI
+	if regionName == "" {
+		client = dynamodb.New(awssf.Session)
+	} else {
+		client = dynamodb.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &DynamoDBService{
+		Client: client,
+	}
+}
+
+// NetworkFirewallService is a struct that knows how to interact with AWS Network Firewall.
+type NetworkFirewallService struct {
+	Client networkfirewalliface.NetworkFirewallAPI
+}
+
+// GetNetworkFirewallService returns an instance of a NetworkFirewallService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetNetworkFirewallService(regionName string) *NetworkFirewallService {
+	var client networkfirewalliface.NetworkFirewallAPI
+	if regionName == "" {
+		client = networkfirewall.New(awssf.Session)
+	} else {
+		client = networkfirewall.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &NetworkFirewallService{
+		Client: client,
+	}
+}
+
+// SageMakerService is a struct that knows how to interact with AWS SageMaker.
+type SageMakerService struct {
+	Client sagemakeriface.SageMakerAPI
+}
+
+// GetSageMakerService returns an instance of a SageMakerService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetSageMakerService(regionName string) *SageMakerService {
+	var client sagemakeriface.SageMakerAPI
+	if regionName == "" {
+		client = sagemaker.New(awssf.Session)
+	} else {
+		client = sagemaker.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &SageMakerService{
+		Client: client,
+	}
+}
+
+// IAMService is a struct that knows how to get the
+// list of IAM users using an object that implements the IAM API interface.
+type IAMService struct {
+	Client iamiface.IAMAPI
+}
+
+// ListUsers wraps the ListUsers method of the IAM API.
+func (s *IAMService) ListUsers(input *iam.ListUsersInput) (*iam.ListUsersOutput, error) {
+	return s.Client.ListUsers(input)
+}
+
+// Add to AWSServiceFactory to include a method for getting an IAMService instance
+func (awssf *AWSServiceFactory) GetIAMService() *IAMService {
+	return &IAMService{
+		Client: iam.New(awssf.Session),
+	}
+}
+
+// RedshiftService is a struct that knows how to interact with AWS Redshift clusters.
+type RedshiftService struct {
+	Client redshiftiface.RedshiftAPI
+}
+
+// GetRedshiftService returns an instance of a RedshiftService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetRedshiftService(regionName string) *RedshiftService {
+	var client redshiftiface.RedshiftAPI
+	if regionName == "" {
+		client = redshift.New(awssf.Session)
+	} else {
+		client = redshift.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &RedshiftService{
+		Client: client,
+	}
+}
+
+// OpenSearchService is a struct that knows how to interact with AWS OpenSearch domains.
+type OpenSearchService struct {
+	Client opensearchserviceiface.OpenSearchServiceAPI
+}
+
+// GetOpenSearchService returns an instance of an OpenSearchService associated
+// with our session. The caller can supply an optional region name to construct
+// an instance associated with that region.
+func (awssf *AWSServiceFactory) GetOpenSearchService(regionName string) *OpenSearchService {
+	var client opensearchserviceiface.OpenSearchServiceAPI
+	if regionName == "" {
+		client = opensearchservice.New(awssf.Session)
+	} else {
+		client = opensearchservice.New(awssf.Session, aws.NewConfig().WithRegion(regionName))
+	}
+
+	return &OpenSearchService{
+		Client: client,
+	}
 }
 
 // RDSInstanceService is a struct that knows how to get the
@@ -213,6 +488,19 @@ type ServiceFactory interface {
 	GetLambdaService(string) *LambdaService
 	GetContainerService(string) *ContainerService
 	GetLightsailService(string) *LightsailService
+	GetIAMService() *IAMService
+	GetOpenSearchService(string) *OpenSearchService
+	GetRedshiftService(string) *RedshiftService
+	GetElastiCacheService(string) *ElastiCacheService
+	GetDocDBService(string) *DocDBService
+	GetCloudFrontService() *CloudFrontService
+	GetAPIGatewayService(string) *APIGatewayService
+	GetAPIGatewayV2Service(string) *APIGatewayV2Service
+	GetELBService(string) *ELBService
+	GetELBv2Service(string) *ELBv2Service
+	GetDynamoDBService(string) *DynamoDBService
+	GetNetworkFirewallService(string) *NetworkFirewallService
+	GetSageMakerService(string) *SageMakerService
 }
 
 // AWSServiceFactory is a struct that holds a reference to
